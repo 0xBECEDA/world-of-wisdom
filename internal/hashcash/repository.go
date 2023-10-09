@@ -1,7 +1,7 @@
 package hashcash
 
 import (
-	"go/storage"
+	"world-of-wisdom/storage"
 )
 
 type Repository interface {

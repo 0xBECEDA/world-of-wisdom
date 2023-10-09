@@ -3,20 +3,21 @@ package server
 import (
 	"encoding/binary"
 	"encoding/json"
-	hashcash2 "go/internal/hashcash"
-	"go/internal/quotes"
-	"go/internal/tcp_message"
-	"go/utils"
+	"io"
 	"log"
 	"net"
+	"world-of-wisdom/internal/hashcash"
+	"world-of-wisdom/internal/quotes"
+	"world-of-wisdom/internal/tcp_message"
+	"world-of-wisdom/utils"
 )
 
 type Server struct {
-	powService   hashcash2.Service
+	powService   hashcash.Service
 	quoteService quotes.QuoteService
 }
 
-func NewServer(hashcashService hashcash2.Service, quoteService quotes.QuoteService) *Server {
+func NewServer(hashcashService hashcash.Service, quoteService quotes.QuoteService) *Server {
 	return &Server{
 		powService:   hashcashService,
 		quoteService: quoteService,
@@ -44,24 +45,46 @@ func (s *Server) handleConn(clientConn net.Conn) {
 	defer clientConn.Close()
 
 	for {
-		req := make([]byte, 0)
-		_, err := clientConn.Read(req)
+		req, err := s.readFromConn(clientConn)
 		if err != nil {
+			log.Printf("error reading request: %s", err.Error())
 			return
 		}
 
 		response, err := s.processRequest(req)
 		if err != nil {
-			return
+			log.Printf("error processing request: %s", err.Error())
+			continue
 		}
 
 		if response != nil {
 			err = utils.SendMessage(*response, clientConn)
 			if err != nil {
-				log.Printf("error sending tcp message:")
+				log.Printf("error sending tcp message: %s", err.Error())
 			}
 		}
 	}
+}
+
+func (s *Server) readFromConn(conn net.Conn) ([]byte, error) {
+	buffer := make([]byte, 1024)
+	var data []byte
+
+	for {
+		n, err := conn.Read(buffer)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return nil, err
+		}
+
+		data = append(data, buffer[:n]...)
+		if n < len(buffer) {
+			break
+		}
+	}
+	return data, nil
 }
 
 func (s *Server) processRequest(clientRequest []byte) (*tcp_message.Message, error) {
@@ -85,13 +108,10 @@ func (s *Server) challengeRequestHandler(req *tcp_message.Message) (*tcp_message
 		return nil, ErrEmptyMessage
 	}
 
-	hash := hashcash2.NewHashcash(5, req.Data)
+	hash := hashcash.NewHashcash(5, req.Data)
 	log.Printf("adding hash %++v", hash)
 
-	if err := s.powService.AddHashIndicator(binary.BigEndian.Uint64(hash.Rand)); err != nil {
-		return nil, ErrFailedToAddIndicator
-	}
-
+	s.powService.AddHashIndicator(binary.BigEndian.Uint64(hash.Rand))
 	marshaledStamp, err := json.Marshal(hash)
 	if err != nil {
 		return nil, ErrFailedToMarshal
@@ -101,7 +121,7 @@ func (s *Server) challengeRequestHandler(req *tcp_message.Message) (*tcp_message
 }
 
 func (s *Server) handleQuoteRequest(parsedRequest tcp_message.Message) (*tcp_message.Message, error) {
-	var stamp hashcash2.Hashcash
+	var stamp hashcash.Hashcash
 	err := json.Unmarshal([]byte(parsedRequest.Data), &stamp)
 	if err != nil {
 		return nil, ErrFailedToUnmarshal
@@ -110,8 +130,8 @@ func (s *Server) handleQuoteRequest(parsedRequest tcp_message.Message) (*tcp_mes
 	log.Printf("received hash %++v", stamp)
 
 	randNum := binary.BigEndian.Uint64(stamp.Rand)
-	_, err = s.powService.GetHashIndicator(randNum)
-	if err != nil {
+	ok := s.powService.IndicatorExists(randNum)
+	if !ok {
 		return nil, ErrFailedToGetRand
 	}
 
@@ -120,7 +140,7 @@ func (s *Server) handleQuoteRequest(parsedRequest tcp_message.Message) (*tcp_mes
 	}
 
 	responseMessage := tcp_message.NewMessage(tcp_message.QuoteResp, s.quoteService.GetQuote().QuoteText)
-	err = s.powService.RemoveHashIndicator(randNum)
+	err = s.powService.DeleteIndicator(randNum)
 	if err != nil {
 		return nil, ErrFailedToRemoveIndicator
 	}

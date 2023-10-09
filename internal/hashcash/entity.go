@@ -3,10 +3,10 @@ package hashcash
 import (
 	"encoding/base64"
 	"fmt"
-	"go/utils"
 	"math/big"
 	"math/rand"
 	"time"
+	"world-of-wisdom/utils"
 )
 
 const (

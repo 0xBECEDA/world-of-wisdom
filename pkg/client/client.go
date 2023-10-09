@@ -3,18 +3,19 @@ package client
 import (
 	"bufio"
 	"encoding/json"
-	"go/internal/hashcash"
-	"go/internal/tcp_message"
-	"go/utils"
+	"fmt"
 	"log"
 	"net"
+	"world-of-wisdom/internal/hashcash"
+	"world-of-wisdom/internal/tcp_message"
+	"world-of-wisdom/utils"
 )
 
 const maxIterations = 10000000
 
 type Client struct {
 	Hostname string
-	Port     string
+	Port     int64
 	Resource string
 }
 
@@ -27,7 +28,10 @@ func NewClient(config *Config) *Client {
 }
 
 func (r *Client) Start() error {
-	conn, err := net.Dial("tcp", r.Hostname+":"+r.Port)
+	addr := fmt.Sprintf("%v:%v", r.Hostname, r.Port)
+	log.Printf("starting client on %s", addr)
+
+	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		return err
 	}
@@ -72,8 +76,7 @@ func (r *Client) handleChallengeResponse(resp string, conn net.Conn) error {
 		return err
 	}
 
-	log.Printf("Received quotes: %s", quote)
-
+	log.Printf("received quote: %s", quote)
 	return nil
 }
 
@@ -97,36 +100,36 @@ func unmarshallQuote(respQuote string) (string, error) {
 }
 
 func handleChallengeResponse(resp string) (*tcp_message.Message, error) {
-	stamp := &hashcash.Hashcash{}
-	if err := unmarshallStamp(resp, stamp); err != nil {
+	hash := &hashcash.Hashcash{}
+	if err := unmarshallHash(resp, hash); err != nil {
 		return nil, err
 	}
 
-	_, err := solveStamp(stamp)
+	_, err := solveHash(hash)
 	if err != nil {
 		return nil, err
 	}
-	return prepareQuoteRequest(stamp), nil
+	return prepareQuoteRequest(hash), nil
 }
 
-func unmarshallStamp(resp string, stamp *hashcash.Hashcash) error {
+func unmarshallHash(resp string, hash *hashcash.Hashcash) error {
 	challengeResponseMessage := tcp_message.Message{}
 	err := json.Unmarshal([]byte(resp), &challengeResponseMessage)
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal([]byte(challengeResponseMessage.Data), stamp)
+	return json.Unmarshal([]byte(challengeResponseMessage.Data), hash)
 }
 
-func solveStamp(stamp *hashcash.Hashcash) (*hashcash.Hashcash, error) {
-	err := stamp.ComputeHash(maxIterations)
+func solveHash(hash *hashcash.Hashcash) (*hashcash.Hashcash, error) {
+	err := hash.ComputeHash(maxIterations)
 	if err != nil {
 		return nil, err
 	}
-	return stamp, nil
+	return hash, nil
 }
 
-func prepareQuoteRequest(solvedStamp *hashcash.Hashcash) *tcp_message.Message {
-	solvedStampMarshalled, _ := json.Marshal(solvedStamp)
-	return &tcp_message.Message{Type: tcp_message.QuoteReq, Data: string(solvedStampMarshalled)}
+func prepareQuoteRequest(solvedHash *hashcash.Hashcash) *tcp_message.Message {
+	solvedHashMarshalled, _ := json.Marshal(solvedHash)
+	return &tcp_message.Message{Type: tcp_message.QuoteReq, Data: string(solvedHashMarshalled)}
 }

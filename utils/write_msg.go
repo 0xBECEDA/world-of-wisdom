@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"go/internal/tcp_message"
 	"net"
+	"world-of-wisdom/internal/tcp_message"
 )
 
 func SendMessage(msg tcp_message.Message, clientConn net.Conn) error {

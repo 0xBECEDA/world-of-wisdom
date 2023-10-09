@@ -1,9 +1,9 @@
 package hashcash
 
 type Service interface {
-	AddHashIndicator(indicator uint64) error
-	GetHashIndicator(indicator uint64) (uint64, error)
-	RemoveHashIndicator(indicator uint64) error
+	AddHashIndicator(indicator uint64)
+	IndicatorExists(indicator uint64) bool
+	DeleteIndicator(indicator uint64) error
 }
 
 type PowService struct {
@@ -16,14 +16,14 @@ func NewService(hashRepo Repository) *PowService {
 	}
 }
 
-func (s *PowService) AddHashIndicator(indicator uint64) error {
-	return s.repo.AddIndicator(indicator)
+func (s *PowService) AddHashIndicator(indicator uint64) {
+	s.repo.AddIndicator(indicator)
 }
 
-func (s *PowService) GetHashIndicator(indicator uint64) (uint64, error) {
-	return s.repo.GetIndicator(indicator)
+func (s *PowService) IndicatorExists(indicator uint64) bool {
+	return s.repo.IndicatorExists(indicator)
 }
 
-func (s *PowService) RemoveHashIndicator(indicator uint64) error {
-	return s.repo.RemoveIndicator(indicator)
+func (s *PowService) DeleteIndicator(indicator uint64) error {
+	return s.repo.DeleteIndicator(indicator)
 }
