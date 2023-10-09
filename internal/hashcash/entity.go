@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"math/rand"
 	"time"
-	"world-of-wisdom/utils"
+	"world-of-wisdom/pkg/utils"
 )
 
 const (

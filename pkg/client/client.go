@@ -1,21 +1,20 @@
 package client
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net"
 	"world-of-wisdom/internal/hashcash"
 	"world-of-wisdom/internal/tcp_message"
-	"world-of-wisdom/utils"
+	"world-of-wisdom/pkg/utils"
 )
 
 const maxIterations = 10000000
 
 type Client struct {
 	Hostname string
-	Port     int64
+	Port     string
 	Resource string
 }
 
@@ -48,7 +47,7 @@ func (r *Client) handleConnection(conn net.Conn) error {
 		return err
 	}
 
-	resp, err := receiveResponse(conn)
+	resp, err := utils.ReadFromConn(conn)
 	if err != nil {
 		return err
 	}
@@ -56,17 +55,16 @@ func (r *Client) handleConnection(conn net.Conn) error {
 	return r.handleChallengeResponse(resp, conn)
 }
 
-func (r *Client) handleChallengeResponse(resp string, conn net.Conn) error {
+func (r *Client) handleChallengeResponse(resp []byte, conn net.Conn) error {
 	quoteRequest, err := handleChallengeResponse(resp)
 	if err != nil {
 		return err
 	}
 
-	if err := utils.SendMessage(*quoteRequest, conn); err != nil {
+	if err := utils.WriteConn(*quoteRequest, conn); err != nil {
 		return err
 	}
-
-	respQuote, err := receiveResponse(conn)
+	respQuote, err := utils.ReadFromConn(conn)
 	if err != nil {
 		return err
 	}
@@ -76,30 +74,25 @@ func (r *Client) handleChallengeResponse(resp string, conn net.Conn) error {
 		return err
 	}
 
-	log.Printf("received quote: %s", quote)
+	log.Printf("received quote: '%s'(c)", quote)
 	return nil
 }
 
 func (r *Client) requestChallenge(conn net.Conn) error {
 	msg := tcp_message.NewMessage(tcp_message.ChallengeReq, "")
-	return utils.SendMessage(*msg, conn)
+	return utils.WriteConn(*msg, conn)
 }
 
-func receiveResponse(conn net.Conn) (string, error) {
-	reader := bufio.NewReader(conn)
-	return reader.ReadString('\n')
-}
-
-func unmarshallQuote(respQuote string) (string, error) {
+func unmarshallQuote(respQuote []byte) (string, error) {
 	quoteResponseMessage := tcp_message.Message{}
-	err := json.Unmarshal([]byte(respQuote), &quoteResponseMessage)
+	err := json.Unmarshal(respQuote, &quoteResponseMessage)
 	if err != nil {
 		return "", err
 	}
 	return quoteResponseMessage.Data, nil
 }
 
-func handleChallengeResponse(resp string) (*tcp_message.Message, error) {
+func handleChallengeResponse(resp []byte) (*tcp_message.Message, error) {
 	hash := &hashcash.Hashcash{}
 	if err := unmarshallHash(resp, hash); err != nil {
 		return nil, err
@@ -112,9 +105,9 @@ func handleChallengeResponse(resp string) (*tcp_message.Message, error) {
 	return prepareQuoteRequest(hash), nil
 }
 
-func unmarshallHash(resp string, hash *hashcash.Hashcash) error {
+func unmarshallHash(resp []byte, hash *hashcash.Hashcash) error {
 	challengeResponseMessage := tcp_message.Message{}
-	err := json.Unmarshal([]byte(resp), &challengeResponseMessage)
+	err := json.Unmarshal(resp, &challengeResponseMessage)
 	if err != nil {
 		return err
 	}

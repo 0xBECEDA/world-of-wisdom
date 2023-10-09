@@ -9,7 +9,7 @@ import (
 	"world-of-wisdom/internal/hashcash"
 	"world-of-wisdom/internal/quotes"
 	"world-of-wisdom/internal/tcp_message"
-	"world-of-wisdom/utils"
+	"world-of-wisdom/pkg/utils"
 )
 
 type Server struct {
@@ -51,6 +51,10 @@ func (s *Server) handleConn(clientConn net.Conn) {
 			return
 		}
 
+		if len(req) == 0 {
+			continue
+		}
+
 		response, err := s.processRequest(req)
 		if err != nil {
 			log.Printf("error processing request: %s", err.Error())
@@ -58,7 +62,7 @@ func (s *Server) handleConn(clientConn net.Conn) {
 		}
 
 		if response != nil {
-			err = utils.SendMessage(*response, clientConn)
+			err = utils.WriteConn(*response, clientConn)
 			if err != nil {
 				log.Printf("error sending tcp message: %s", err.Error())
 			}

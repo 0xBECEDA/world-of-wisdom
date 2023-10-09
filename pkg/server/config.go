@@ -1,16 +1,23 @@
 package server
 
-import "errors"
+import (
+	"errors"
+	"os"
+)
 
-var ErrEmptyPort = errors.New("empty server port")
+var (
+	ErrEmptyPort = errors.New("empty server port")
+)
 
 type Config struct {
-	Port int64
+	Port string
 }
 
-func (c *Config) Validate() error {
-	if c.Port == 0 {
+func (c *Config) Load() error {
+	port := os.Getenv("PORT")
+	if port == "" {
 		return ErrEmptyPort
 	}
+	c.Port = port
 	return nil
 }

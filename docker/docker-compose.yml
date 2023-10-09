@@ -1,0 +1,20 @@
+version: "3"
+services:
+  server:
+    container_name: server
+    hostname: server
+    image: server:latest
+    environment:
+      PORT: 10123
+    ports:
+      - "10123:10123"
+  client:
+    container_name: client
+    image: client:latest
+    environment:
+      PORT: 10123
+      HOSTNAME: server
+      RESOURCE: example.com
+    restart: "on-failure"
+    depends_on:
+     - server

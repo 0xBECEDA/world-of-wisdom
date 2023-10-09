@@ -1,18 +1,33 @@
 package client
 
-import "errors"
+import (
+	"errors"
+	"os"
+)
 
-var ErrEmptyHostName = errors.New("empty host or port, check your envs")
+var (
+	ErrEmptyPort = errors.New("empty client port")
+	ErrEmptyHost = errors.New("empty client host")
+)
 
 type Config struct {
-	Hostname string `json:"HOSTNAME"`
-	Port     int64  `json:"PORT"`
-	Resource string `json:"RESOURCE"`
+	Hostname string
+	Port     string
+	Resource string
 }
 
-func (c *Config) Validate() error {
-	if c.Hostname == "" || c.Port == 0 {
-		return ErrEmptyHostName
+func (c *Config) Load() error {
+	host := os.Getenv("HOSTNAME")
+	if host == "" {
+		return ErrEmptyHost
 	}
+	c.Hostname = host
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		return ErrEmptyPort
+	}
+	c.Port = port
+	c.Resource = os.Getenv("RESOURCE")
 	return nil
 }

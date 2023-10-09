@@ -5,14 +5,13 @@ import (
 	"log"
 	"world-of-wisdom/internal/hashcash"
 	"world-of-wisdom/internal/quotes"
-	"world-of-wisdom/pkg/config"
+	"world-of-wisdom/internal/storage"
 	"world-of-wisdom/pkg/server"
-	"world-of-wisdom/storage"
 )
 
 func main() {
 	cfg := &server.Config{}
-	if err := config.LoadConfig(cfg); err != nil {
+	if err := cfg.Load(); err != nil {
 		log.Fatalf("failed start server %s", err.Error())
 	}
 
