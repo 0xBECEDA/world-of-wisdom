@@ -5,16 +5,18 @@ services:
     hostname: server
     image: server:latest
     environment:
-      PORT: 10123
-    ports:
-      - "10123:10123"
+      PORT: 8080
+    expose:
+      - "8080"
   client:
     container_name: client
     image: client:latest
     environment:
-      PORT: 10123
+      PORT: 8080
       HOSTNAME: server
       RESOURCE: example.com
+    expose:
+      - "8080"
     restart: "on-failure"
     depends_on:
      - server

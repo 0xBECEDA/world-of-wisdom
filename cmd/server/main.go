@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"world-of-wisdom/internal/hashcash"
 	"world-of-wisdom/internal/quotes"
@@ -22,6 +21,7 @@ func main() {
 
 	tcpServer := server.NewServer(hashService, quoteService)
 
-	log.Printf("starting tcp server on port %v", cfg.Port)
-	log.Fatal(tcpServer.Listen(fmt.Sprintf("localhost:%v", cfg.Port)))
+	addr := ":" + cfg.Port
+	log.Printf("starting tcp server on addr %v", addr)
+	log.Fatal(tcpServer.Listen(addr))
 }

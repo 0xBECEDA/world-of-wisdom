@@ -149,6 +149,5 @@ func (s *Server) handleQuoteRequest(parsedRequest tcp_message.Message) (*tcp_mes
 		return nil, ErrFailedToRemoveIndicator
 	}
 
-	log.Printf("response tcp_message: %++v", responseMessage)
 	return responseMessage, nil
 }
