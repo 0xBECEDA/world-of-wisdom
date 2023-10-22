@@ -2,7 +2,8 @@ package main
 
 import (
 	"log"
-	"world-of-wisdom/pkg/client"
+
+	"world-of-wisdom/internal/client"
 )
 
 func main() {

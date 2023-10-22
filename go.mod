@@ -7,4 +7,9 @@ require (
 	github.com/cristalhq/aconfig/aconfigdotenv v0.17.1
 )
 
-require github.com/joho/godotenv v1.4.0 // indirect
+require (
+	github.com/hashicorp/go-msgpack v0.5.5 // indirect
+	github.com/joho/godotenv v1.4.0 // indirect
+	github.com/vmihailenco/msgpack/v5 v5.4.0 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
+)

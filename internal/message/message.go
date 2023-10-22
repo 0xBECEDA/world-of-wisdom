@@ -1,7 +1,7 @@
-package tcp_message
+package message
 
 import (
-	"encoding/json"
+	"github.com/vmihailenco/msgpack/v5"
 )
 
 type Message struct {
@@ -10,12 +10,12 @@ type Message struct {
 }
 
 func (m *Message) Marshal() ([]byte, error) {
-	return json.Marshal(m)
+	return msgpack.Marshal(m)
 }
 
 func Parse(req []byte) (*Message, error) {
 	var msg Message
-	err := json.Unmarshal(req, &msg)
+	err := msgpack.Unmarshal(req, &msg)
 	if err != nil {
 		return nil, err
 	}

@@ -1,4 +1,4 @@
-package hashcash
+package pow
 
 import (
 	"encoding/base64"
@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"math/rand"
 	"time"
-	"world-of-wisdom/pkg/utils"
+	"world-of-wisdom/internal/utils"
 )
 
 const (

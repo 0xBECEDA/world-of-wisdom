@@ -2,7 +2,7 @@ package quotes
 
 import "math/rand"
 
-type QuoteRepo interface {
+type QuoteRepository interface {
 	GetQuote() Quote
 }
 
@@ -45,6 +45,5 @@ func NewRepository() *Repo {
 
 func (r *Repo) GetQuote() Quote {
 	randomIndex := rand.Int() % len(r.quotes)
-
 	return r.quotes[randomIndex]
 }

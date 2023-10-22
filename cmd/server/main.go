@@ -2,10 +2,10 @@ package main
 
 import (
 	"log"
-	"world-of-wisdom/internal/hashcash"
+	"world-of-wisdom/internal/pow"
 	"world-of-wisdom/internal/quotes"
+	"world-of-wisdom/internal/server"
 	"world-of-wisdom/internal/storage"
-	"world-of-wisdom/pkg/server"
 )
 
 func main() {
@@ -14,14 +14,9 @@ func main() {
 		log.Fatalf("failed start server %s", err.Error())
 	}
 
-	hashRepository := hashcash.NewHashCashRepository(storage.NewStorage())
-	hashService := hashcash.NewService(hashRepository)
-
-	quoteService := quotes.NewService(quotes.NewRepository())
-
-	tcpServer := server.NewServer(hashService, quoteService)
-
+	tcpServer := server.NewServer(pow.NewHashCashRepository(storage.NewStorage()), quotes.NewRepository(), cfg.WriteDeadline, cfg.ReadDeadline)
 	addr := ":" + cfg.Port
+
 	log.Printf("starting tcp server on addr %v", addr)
 	log.Fatal(tcpServer.Listen(addr))
 }

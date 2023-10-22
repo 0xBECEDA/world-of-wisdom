@@ -1,4 +1,4 @@
-package tcp_message
+package message
 
 type Type int
 

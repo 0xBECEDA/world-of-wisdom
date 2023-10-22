@@ -2,25 +2,34 @@ package server
 
 import (
 	"encoding/binary"
-	"encoding/json"
-	"io"
+	"github.com/vmihailenco/msgpack/v5"
 	"log"
 	"net"
-	"world-of-wisdom/internal/hashcash"
+	"time"
+	"world-of-wisdom/internal/message"
+	"world-of-wisdom/internal/pow"
 	"world-of-wisdom/internal/quotes"
-	"world-of-wisdom/internal/tcp_message"
-	"world-of-wisdom/pkg/utils"
+	"world-of-wisdom/internal/utils"
 )
 
 type Server struct {
-	powService   hashcash.Service
-	quoteService quotes.QuoteService
+	powService   pow.Repository
+	quoteService quotes.QuoteRepository
+
+	WriteDeadline time.Duration
+	ReadDeadline  time.Duration
 }
 
-func NewServer(hashcashService hashcash.Service, quoteService quotes.QuoteService) *Server {
+func NewServer(
+	hr pow.Repository,
+	quoteService quotes.QuoteRepository,
+	writeDeadline time.Duration,
+	readDeadline time.Duration) *Server {
 	return &Server{
-		powService:   hashcashService,
-		quoteService: quoteService,
+		powService:    hr,
+		quoteService:  quoteService,
+		WriteDeadline: writeDeadline,
+		ReadDeadline:  readDeadline,
 	}
 }
 
@@ -45,7 +54,7 @@ func (s *Server) handleConn(clientConn net.Conn) {
 	defer clientConn.Close()
 
 	for {
-		req, err := s.readFromConn(clientConn)
+		req, err := utils.ReadFromConn(clientConn, s.ReadDeadline)
 		if err != nil {
 			log.Printf("error reading request: %s", err.Error())
 			return
@@ -62,7 +71,7 @@ func (s *Server) handleConn(clientConn net.Conn) {
 		}
 
 		if response != nil {
-			err = utils.WriteConn(*response, clientConn)
+			err = utils.WriteConn(*response, clientConn, s.WriteDeadline)
 			if err != nil {
 				log.Printf("error sending tcp message: %s", err.Error())
 			}
@@ -70,63 +79,42 @@ func (s *Server) handleConn(clientConn net.Conn) {
 	}
 }
 
-func (s *Server) readFromConn(conn net.Conn) ([]byte, error) {
-	buffer := make([]byte, 1024)
-	var data []byte
-
-	for {
-		n, err := conn.Read(buffer)
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return nil, err
-		}
-
-		data = append(data, buffer[:n]...)
-		if n < len(buffer) {
-			break
-		}
-	}
-	return data, nil
-}
-
-func (s *Server) processRequest(clientRequest []byte) (*tcp_message.Message, error) {
-	parsedRequest, err := tcp_message.Parse(clientRequest)
+func (s *Server) processRequest(clientRequest []byte) (*message.Message, error) {
+	parsedRequest, err := message.Parse(clientRequest)
 	if err != nil {
 		return nil, err
 	}
 
 	switch parsedRequest.Type {
-	case tcp_message.ChallengeReq:
+	case message.ChallengeReq:
 		return s.challengeRequestHandler(parsedRequest)
-	case tcp_message.QuoteReq:
+	case message.QuoteReq:
 		return s.handleQuoteRequest(*parsedRequest)
 	default:
 		return nil, ErrUnknownRequest
 	}
 }
 
-func (s *Server) challengeRequestHandler(req *tcp_message.Message) (*tcp_message.Message, error) {
+func (s *Server) challengeRequestHandler(req *message.Message) (*message.Message, error) {
 	if req == nil {
 		return nil, ErrEmptyMessage
 	}
 
-	hash := hashcash.NewHashcash(5, req.Data)
+	hash := pow.NewHashcash(5, req.Data)
 	log.Printf("adding hash %++v", hash)
 
-	s.powService.AddHashIndicator(binary.BigEndian.Uint64(hash.Rand))
-	marshaledStamp, err := json.Marshal(hash)
+	s.powService.AddIndicator(binary.BigEndian.Uint64(hash.Rand))
+	marshaledStamp, err := msgpack.Marshal(hash)
 	if err != nil {
 		return nil, ErrFailedToMarshal
 	}
 
-	return tcp_message.NewMessage(tcp_message.ChallengeResp, string(marshaledStamp)), nil
+	return message.NewMessage(message.ChallengeResp, string(marshaledStamp)), nil
 }
 
-func (s *Server) handleQuoteRequest(parsedRequest tcp_message.Message) (*tcp_message.Message, error) {
-	var stamp hashcash.Hashcash
-	err := json.Unmarshal([]byte(parsedRequest.Data), &stamp)
+func (s *Server) handleQuoteRequest(parsedRequest message.Message) (*message.Message, error) {
+	var stamp pow.Hashcash
+	err := msgpack.Unmarshal([]byte(parsedRequest.Data), &stamp)
 	if err != nil {
 		return nil, ErrFailedToUnmarshal
 	}
@@ -143,7 +131,7 @@ func (s *Server) handleQuoteRequest(parsedRequest tcp_message.Message) (*tcp_mes
 		return nil, ErrChallengeUnsolved
 	}
 
-	responseMessage := tcp_message.NewMessage(tcp_message.QuoteResp, s.quoteService.GetQuote().QuoteText)
+	responseMessage := message.NewMessage(message.QuoteResp, s.quoteService.GetQuote().QuoteText)
 	err = s.powService.DeleteIndicator(randNum)
 	if err != nil {
 		return nil, ErrFailedToRemoveIndicator
