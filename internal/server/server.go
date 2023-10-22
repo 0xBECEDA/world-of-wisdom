@@ -132,10 +132,7 @@ func (s *Server) handleQuoteRequest(parsedRequest message.Message) (*message.Mes
 	}
 
 	responseMessage := message.NewMessage(message.QuoteResp, s.quoteService.GetQuote().QuoteText)
-	err = s.powService.DeleteIndicator(randNum)
-	if err != nil {
-		return nil, ErrFailedToRemoveIndicator
-	}
+	s.powService.DeleteIndicator(randNum)
 
 	return responseMessage, nil
 }

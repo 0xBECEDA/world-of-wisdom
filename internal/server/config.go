@@ -10,6 +10,7 @@ import (
 const (
 	defaultReadDeadline  = 10
 	defaultWriteDeadline = 10
+	defaultKeyTTL        = 20
 )
 
 var (
@@ -20,6 +21,7 @@ type Config struct {
 	Port          string
 	WriteDeadline time.Duration
 	ReadDeadline  time.Duration
+	KeyTTL        time.Duration
 }
 
 func (c *Config) Load() error {
@@ -49,6 +51,17 @@ func (c *Config) Load() error {
 			return err
 		}
 		c.ReadDeadline = time.Duration(dur) * time.Second
+	}
+
+	keyTTL := os.Getenv("KEY_TTL")
+	if keyTTL == "" {
+		c.KeyTTL = defaultKeyTTL * time.Second
+	} else {
+		dur, err := strconv.Atoi(keyTTL)
+		if err != nil {
+			return err
+		}
+		c.KeyTTL = time.Duration(dur) * time.Second
 	}
 	return nil
 }

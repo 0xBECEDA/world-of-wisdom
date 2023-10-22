@@ -14,9 +14,16 @@ func main() {
 		log.Fatalf("failed start server %s", err.Error())
 	}
 
-	tcpServer := server.NewServer(pow.NewHashCashRepository(storage.NewStorage()), quotes.NewRepository(), cfg.WriteDeadline, cfg.ReadDeadline)
-	addr := ":" + cfg.Port
+	db := storage.NewStorage(cfg.KeyTTL)
+	tcpServer := server.NewServer(
+		pow.NewHashCashRepository(db),
+		quotes.NewRepository(),
+		cfg.WriteDeadline,
+		cfg.ReadDeadline)
 
+	addr := ":" + cfg.Port
 	log.Printf("starting tcp server on addr %v", addr)
+
+	go db.CleanUp()
 	log.Fatal(tcpServer.Listen(addr))
 }
