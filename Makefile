@@ -1,9 +1,7 @@
 
-build-srv:
+build:
 	docker build -f ./docker/Dockerfile.server -t server .
-
-build-client:
 	docker build -f ./docker/Dockerfile.client -t client .
 
-start: build-srv build-client
+run: build
 	docker compose -f docker/docker-compose.yml up

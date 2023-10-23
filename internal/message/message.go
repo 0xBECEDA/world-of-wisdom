@@ -5,15 +5,15 @@ import (
 )
 
 type Message struct {
-	Type Type   `json:"type"`
-	Data string `json:"data"`
+	Type Type
+	Data string
 }
 
 func (m *Message) Marshal() ([]byte, error) {
 	return msgpack.Marshal(m)
 }
 
-func Parse(req []byte) (*Message, error) {
+func Unmarshal(req []byte) (*Message, error) {
 	var msg Message
 	err := msgpack.Unmarshal(req, &msg)
 	if err != nil {

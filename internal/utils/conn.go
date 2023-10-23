@@ -25,7 +25,7 @@ func WriteConn(msg message.Message, conn net.Conn, deadline time.Duration) error
 	return nil
 }
 
-func ReadFromConn(conn net.Conn, deadline time.Duration) ([]byte, error) {
+func ReadConn(conn net.Conn, deadline time.Duration) ([]byte, error) {
 	buffer := make([]byte, 1024)
 	var data []byte
 

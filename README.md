@@ -1,15 +1,23 @@
 # world-of-wisdom
 
-I choose hashcash algorithm, because of several reasons:
+I choose hashcash algorithm, because of:
 
-Historical Experience: HashCash was one of the first PoW algorithms proposed by Adam Back in 1997. It was successfully used to combat email spam and served as the foundational idea for creating later PoW algorithms, including Bitcoin. Its long history of use attests to its reliability.
+Proven Security: Hashcash has a proven track record of security and has been widely used in various applications, including email spam prevention and cryptocurrency mining. It relies on the computational effort required to find a hash collision, making it resistant to brute-force attacks.
 
-Simplicity and Clarity: HashCash is a relatively simple algorithm, easily understood and implementable. This can be an important aspect, especially if the project aims to democratize mining and involve a wide community.
+Efficiency: Hashcash offers a good balance between computational effort and the time it takes to verify the PoW. It is computationally intensive to find the correct hash, but verification is relatively quick and straightforward, making it an efficient choice.
 
-Scientific Community and Auditing: HashCash has been studied and audited by cryptographic experts and security researchers. This increases trust in its reliability
+idely Adopted: Hashcash is a well-known and widely adopted PoW system, which means that there are existing libraries and tools available for its implementation in various programming languages, including Go.
 
-## how to start 
+Customization: You can customize the difficulty level of the PoW challenge by adjusting the number of leading zeros required in the hash, allowing you to control the level of computational effort required for validation.
 
-``make start``
+Scalability: Hashcash can be adjusted to suit different use cases and scalability requirements. Whether you're implementing it for anti-DDoS protection or other purposes, you can adapt the PoW parameters to your specific needs.
 
-It will build docker images and run app. 
+Resistance to Parallelism: Hashcash's reliance on finding hash collisions is inherently resistant to parallelization, which can deter attackers from easily scaling their computational power to break the system.
+
+Energy Efficiency: Compared to some other PoW algorithms, Hashcash is relatively energy-efficient, making it a suitable choice for applications that aim to minimize environmental impact.
+
+## how to run 
+
+``make run``
+
+It will build docker images and run server and client. 

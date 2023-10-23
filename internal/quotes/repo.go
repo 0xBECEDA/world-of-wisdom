@@ -3,7 +3,7 @@ package quotes
 import "math/rand"
 
 type QuoteRepository interface {
-	GetQuote() Quote
+	GetAnyQuote() Quote
 }
 
 type Repo struct {
@@ -13,13 +13,13 @@ type Repo struct {
 func NewRepository() *Repo {
 	var quotes = []Quote{
 		{
-			QuoteText: "You create your own opportunities. Success doesn’t just come and find you–you have to go out and get it.",
+			QuoteText: "Never decide you are smart enough. Be wise enough to recognize that there is always more to learn",
 		},
 		{
-			QuoteText: "Laughter meets encouragement with our hilarious list of funny motivational quotes about life. ",
+			QuoteText: "Intend to be as wise as nature, for she never gets pace or cadence wrong.",
 		},
 		{
-			QuoteText: "To live is the rarest thing in the world. Most people exist, that is all.",
+			QuoteText: "A loving heart is the truest wisdom.",
 		},
 		{
 			QuoteText: "The worst part of being okay is that okay is far from happy.",
@@ -28,10 +28,10 @@ func NewRepository() *Repo {
 			QuoteText: "Pain is inevitable. Suffering is optional.",
 		},
 		{
-			QuoteText: "Be kind, for everyone you meet is fighting a hard battle.",
+			QuoteText: "Wisdom is trusting the timing of the universe.",
 		},
 		{
-			QuoteText: "The Six Golden Rules of Writing: Read, read, read, and write, write, write.",
+			QuoteText: "Wise is the one who walks against the grain.",
 		},
 		{
 			QuoteText: "To produce a mighty book, you must choose a mighty theme.",
@@ -43,7 +43,7 @@ func NewRepository() *Repo {
 	}
 }
 
-func (r *Repo) GetQuote() Quote {
+func (r *Repo) GetAnyQuote() Quote {
 	randomIndex := rand.Int() % len(r.quotes)
 	return r.quotes[randomIndex]
 }

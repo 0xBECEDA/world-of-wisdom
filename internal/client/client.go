@@ -52,7 +52,7 @@ func (r *Client) handleConnection(conn net.Conn) error {
 		return err
 	}
 
-	resp, err := utils.ReadFromConn(conn, r.ReadDeadline)
+	resp, err := utils.ReadConn(conn, r.ReadDeadline)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (r *Client) handleChallengeResponse(resp []byte, conn net.Conn) error {
 	if err := utils.WriteConn(*quoteRequest, conn, r.WriteDeadline); err != nil {
 		return err
 	}
-	respQuote, err := utils.ReadFromConn(conn, r.ReadDeadline)
+	respQuote, err := utils.ReadConn(conn, r.ReadDeadline)
 	if err != nil {
 		return err
 	}
