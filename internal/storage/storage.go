@@ -58,6 +58,7 @@ func (r *Storage) Delete(key uint64) {
 	delete(r.memoryDB, key)
 }
 
+// CleanUp cleans keys, which are expired, because challenge wasn't resolved in time.
 func (r *Storage) CleanUp() {
 	tick := time.NewTicker(r.keyTTL)
 
