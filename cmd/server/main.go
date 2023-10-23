@@ -24,6 +24,6 @@ func main() {
 	addr := ":" + cfg.Port
 	log.Printf("starting tcp server on addr %v", addr)
 
-	go db.CleanUp()
+	go db.CleanUp() // run cronjob to clean up unresolved challenges
 	log.Fatal(tcpServer.Listen(addr))
 }
