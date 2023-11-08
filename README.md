@@ -1,6 +1,7 @@
 # world-of-wisdom
 
-I choose hashcash algorithm, because of:
+This project is proof-of-concept of TCP-server protected from DDOS attacks with the Prof of Work. As PoW algorythm I choose 
+hashcash algorithm, because of:
 
 Proven Security: Hashcash has a proven track record of security and has been widely used in various applications, including email spam prevention and cryptocurrency mining. It relies on the computational effort required to find a hash collision, making it resistant to brute-force attacks.
 
@@ -16,8 +17,15 @@ Resistance to Parallelism: Hashcash's reliance on finding hash collisions is inh
 
 Energy Efficiency: Compared to some other PoW algorithms, Hashcash is relatively energy-efficient, making it a suitable choice for applications that aim to minimize environmental impact.
 
+After Prof Of Work verification, server sends one of the quotes from “word of wisdom” book or any other collection of the quotes.
+Project also includes tcp-client.
+
+## requirements
+To run application you should have installed docker 20+ version and docker compose 2+ version.
+
 ## how to run 
 
 ``make run``
 
 It will build docker images and run server and client. 
+After receiving quote from server, client will shut down. 
