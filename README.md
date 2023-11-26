@@ -17,7 +17,7 @@ Resistance to Parallelism: Hashcash's reliance on finding hash collisions is inh
 
 Energy Efficiency: Compared to some other PoW algorithms, Hashcash is relatively energy-efficient, making it a suitable choice for applications that aim to minimize environmental impact.
 
-After Prof Of Work verification, server sends one of the quotes from “word of wisdom” book or any other collection of the quotes.
+After Prof Of Work verification, server sends one of the quotes from collection of the quotes.
 Project also includes tcp-client.
 
 ## requirements
