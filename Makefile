@@ -1,7 +1,5 @@
-
 build:
-	docker build -f ./docker/Dockerfile.server -t server .
-	docker build -f ./docker/Dockerfile.client -t client .
+	docker build -f ./docker/Dockerfile -t app .
 
 run: build
 	docker compose -f docker/docker-compose.yml up

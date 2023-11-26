@@ -12,8 +12,8 @@ func main() {
 		log.Fatalf("failed to start client: %s", err.Error())
 	}
 
-	tcpClient := client.NewClient(cfg)
-	err := tcpClient.Start()
+	tcpClient := client.New(cfg)
+	err := tcpClient.Run()
 	if err != nil {
 		log.Fatalf("failed to start client: %s", err.Error())
 	}

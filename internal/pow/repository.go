@@ -5,9 +5,9 @@ import (
 )
 
 type Repository interface {
-	AddIndicator(indicator uint64)
-	IndicatorExists(indicator uint64) bool
-	DeleteIndicator(indicator uint64)
+	Add(indicator uint64)
+	Exists(indicator uint64) bool
+	Delete(indicator uint64)
 }
 
 type RepositoryHashCash struct {
@@ -20,11 +20,11 @@ func NewHashCashRepository(storage storage.DB) *RepositoryHashCash {
 	}
 }
 
-func (repo *RepositoryHashCash) AddIndicator(indicator uint64) {
+func (repo *RepositoryHashCash) Add(indicator uint64) {
 	repo.storage.Add(indicator)
 }
 
-func (repo *RepositoryHashCash) IndicatorExists(indicator uint64) bool {
+func (repo *RepositoryHashCash) Exists(indicator uint64) bool {
 	_, err := repo.storage.Get(indicator)
 	if err != nil {
 		return false
@@ -32,6 +32,6 @@ func (repo *RepositoryHashCash) IndicatorExists(indicator uint64) bool {
 	return true
 }
 
-func (repo *RepositoryHashCash) DeleteIndicator(indicator uint64) {
+func (repo *RepositoryHashCash) Delete(indicator uint64) {
 	repo.storage.Delete(indicator)
 }

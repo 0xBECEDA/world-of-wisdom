@@ -11,8 +11,8 @@ type Server struct {
 	powService   pow.Repository
 	quoteService quotes.QuoteRepository
 
-	WriteDeadline time.Duration
-	ReadDeadline  time.Duration
+	writeDeadline time.Duration
+	readDeadline  time.Duration
 }
 
 func NewServer(
@@ -23,8 +23,8 @@ func NewServer(
 	return &Server{
 		powService:    hr,
 		quoteService:  quoteService,
-		WriteDeadline: writeDeadline,
-		ReadDeadline:  readDeadline,
+		writeDeadline: writeDeadline,
+		readDeadline:  readDeadline,
 	}
 }
 

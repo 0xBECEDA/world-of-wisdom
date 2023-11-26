@@ -14,7 +14,7 @@ func (s *Server) handle(clientConn net.Conn) {
 	defer clientConn.Close()
 
 	for {
-		req, err := utils.ReadConn(clientConn, s.ReadDeadline)
+		req, err := utils.ReadConn(clientConn, s.readDeadline)
 		if err != nil {
 			log.Printf("error reading request: %s", err.Error())
 			return
@@ -31,7 +31,7 @@ func (s *Server) handle(clientConn net.Conn) {
 		}
 
 		if response != nil {
-			err = utils.WriteConn(*response, clientConn, s.WriteDeadline)
+			err = utils.WriteConn(*response, clientConn, s.writeDeadline)
 			if err != nil {
 				log.Printf("error sending tcp message: %s", err.Error())
 			}
@@ -63,7 +63,7 @@ func (s *Server) challengeHandler(req *message.Message) (*message.Message, error
 	hash := pow.NewHashcash(5, req.Data)
 	log.Printf("adding hash %++v", hash)
 
-	s.powService.AddIndicator(binary.BigEndian.Uint64(hash.Rand))
+	s.powService.Add(binary.BigEndian.Uint64(hash.Rand))
 	marshaledStamp, err := msgpack.Marshal(hash)
 	if err != nil {
 		return nil, ErrFailedToMarshal
@@ -80,17 +80,17 @@ func (s *Server) quoteHandler(parsedRequest message.Message) (*message.Message, 
 	}
 
 	randNum := binary.BigEndian.Uint64(hash.Rand)
-	ok := s.powService.IndicatorExists(randNum)
+	ok := s.powService.Exists(randNum)
 	if !ok {
 		return nil, ErrFailedToGetRand
 	}
 
-	if !hash.Verify() {
+	if !hash.Check() {
 		return nil, ErrChallengeUnsolved
 	}
 
-	responseMessage := message.NewMessage(message.QuoteResp, s.quoteService.GetAnyQuote().QuoteText)
-	s.powService.DeleteIndicator(randNum)
+	responseMessage := message.NewMessage(message.QuoteResp, s.quoteService.GetAnyQuote().Text)
+	s.powService.Delete(randNum)
 
 	return responseMessage, nil
 }

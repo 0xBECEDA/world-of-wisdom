@@ -11,8 +11,7 @@ import (
 
 const (
 	version1 = 1
-
-	zeroByte = '0'
+	zero     = '0'
 )
 
 type Hashcash struct {
@@ -44,30 +43,30 @@ func (h *Hashcash) String() string {
 	)
 }
 
-func randBytes() []byte {
-	return big.NewInt(int64(rand.Uint64())).Bytes()
-}
-
-func (h *Hashcash) Verify() bool {
+func (h *Hashcash) Check() bool {
 	hashString := utils.Data2Sha1Hash(h.String())
 	if h.Bits > len(hashString) {
 		return false
 	}
 
 	for _, ch := range hashString[:h.Bits] {
-		if ch != zeroByte {
+		if ch != zero {
 			return false
 		}
 	}
 	return true
 }
 
-func (h *Hashcash) ComputeHash(maxIterations int64) error {
+func (h *Hashcash) Compute(maxIterations int64) error {
 	for h.Counter <= maxIterations || maxIterations <= 0 {
-		if h.Verify() {
+		if h.Check() {
 			return nil
 		}
 		h.Counter++
 	}
-	return ErrMaxIterationsExceeded
+	return ErrMaxIterExceeded
+}
+
+func randBytes() []byte {
+	return big.NewInt(int64(rand.Uint64())).Bytes()
 }

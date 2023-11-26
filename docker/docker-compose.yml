@@ -3,20 +3,20 @@ services:
   server:
     container_name: server
     hostname: server
-    image: server:latest
+    image: app:latest
     environment:
       PORT: 8080
+    command: ["/server"]
     expose:
       - "8080"
   client:
     container_name: client
-    image: client:latest
+    image: app:latest
     environment:
       PORT: 8080
       HOSTNAME: server
       RESOURCE: example.com
-    expose:
-      - "8080"
+    command: ["/client"]
     restart: "on-failure"
     depends_on:
-     - server
+      - server
