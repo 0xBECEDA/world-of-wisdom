@@ -29,3 +29,5 @@ To run application you should have installed docker 20+ version and docker compo
 
 It will build docker images and run server and client. 
 After receiving quote from server, client will shut down. 
+
+``make stop`` will stop server and client.
